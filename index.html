@@ -77,6 +77,8 @@ controller = {
 	},
 
 	addExits: function() {
+
+		// Generate random entry/exit points
 		entry  	= [this.getRandomIntInclusive(1, model.minefieldSize -2), 0];
 		exit 	= [this.getRandomIntInclusive(1, model.minefieldSize -2), model.minefieldSize -1];
 
@@ -222,6 +224,8 @@ BFS = {
 	run: function() {
 		this.init();
 		
+		complete = false;
+
 		console.log("run: STARTING LIST");
 		console.log(this.list);
 		console.log(this.list.length);
@@ -234,10 +238,17 @@ BFS = {
 				this.explore(currentBlock);
 			} else {
 				console.log("We found the exit!");
+				complete = true;
 				console.log(currentBlock);
+				break;
 			}
 
+			console.log("List size: " + this.list.length);
 			console.log("Grabbing next node to explore..");
+		} 
+
+		if (!complete) {
+			console.log("NO PATH AVAILABLE YOU DED M9");
 		}
 
 	}
