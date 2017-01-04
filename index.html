@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MineSearcher</title>
+
+	<link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Istok+Web|Lemonada|Tinos:700i|Yellowtail" rel="stylesheet">
+
+	<style type="text/css">
+		
+		body {
+			font-family: "Istok Web";
+			font-size: 14px;
+		}
+
+		h1, h2, h3, h4, h5 {
+			font-family: "Lemonada";
+		}
+
+		canvas {
+			/*border: 2px solid grey;*/
+		}
+
+	</style>
+</head>
+<body>
+
+<h1>MineSearcher</h1>
+
+	<canvas id="canvas" height="500" width="500"></canvas>
+
+	<br>
+
+	<button onclick="view.render()">render</button>
+
+	<h4>BFS data</h4>
+	Current position: <div id="current-position"></div> <br>
+	Children: <div id="children"></div> <br>
+	Parent: <div id="parent"></div> <br>
+</body>
+
+
+
+<script src="bfs.js"></script>
+
+<script>
+	
+
+model = {
+	blockSize: 		20,
+	blockGap: 		5,
+	minefieldSize: 	10,
+	blockDensity: 	0.3,
+	blocks: 		[],
+	entry: 			[],
+	exit: 			[],
+}
+
+
+
+
+
+
+
+controller = {
+
+	init: function() {
+		this.generateBlocks();	
+		view.init();
+	},
+
+	generateBlocks: function() {
+		for (x = 0; x < model.minefieldSize; x++) {
+			for (y = 0; y < model.minefieldSize; y++) {
+				model.blocks.push(new Block(x, y, Math.random() < model.blockDensity, this.isWall(x, y, model.minefieldSize)));
+			}
+		} this.addExits();
+	},
+
+	addExits: function() {
+		entry  	= [this.getRandomIntInclusive(1, model.minefieldSize -2), 0];
+		exit 	= [this.getRandomIntInclusive(1, model.minefieldSize -2), model.minefieldSize -1];
+
+		for (var i = 0; i < model.blocks.length; i++) {
+			if ((model.blocks[i].x == entry[0]) && (model.blocks[i].y == entry[1])) {
+				model.blocks[i].isEntry = true; 
+				model.blocks[i].isWall = false; 
+				break;
+			}
+		}
+
+		for (var i = 0; i < model.blocks.length; i++) {
+			if ((model.blocks[i].x == exit[0]) && (model.blocks[i].y == exit[1])) {
+				model.blocks[i].isExit = true; 
+				model.blocks[i].isWall = false; 
+				break;
+			}
+		}
+
+		model.entry = entry;
+		model.exit = exit;
+	},
+
+	getBlocks: function() {
+		return model.blocks;
+	},
+
+	getEntry: function() {
+		return model.entry;
+	},
+
+	getSettings: function() {
+		return settings = {
+			blockSize:  	model.blockSize,
+			blockGap:  		model.blockGap,
+			minefieldSize:  model.minefieldSize,
+			blockDensity:  	model.blockDensity
+		}
+	},
+
+	getRandomIntInclusive: function(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+
+	isWall: function(x, y, minefieldSize) {
+		return ((x == 0) || (x == model.minefieldSize -1) || (y == 0) || y == (model.minefieldSize -1));
+	}
+}
+
+
+
+
+
+BFS = {
+	init: function() {
+		this.blocks = controller.getBlocks();
+		this.list	= [];
+
+		// Find the entrance and add the node to list 
+		// so we can get started
+		for (var i = 0; i < this.blocks.length; i++) {
+			if (this.blocks[i].isEntry) {
+				console.log("init: adding first node to list");
+				console.log(this.blocks[i]);
+
+				this.list.push(this.blocks[i]);
+				break;
+			}
+		}
+
+		console.log("init: STARTING LIST");
+		console.log(this.list);
+
+	},
+
+
+
+	// LEFT > DOWN > RIGHT > UP
+	explore: function(currentBlock) {
+		if (this.canMoveLeft(currentBlock)) {
+			child = this.fetchBlock(currentBlock.x - 1, currentBlock.y);
+			currentBlock.children.push(child);
+			this.list.push(child);
+		}  
+
+		if (this.canMoveDown(currentBlock)) {
+			child = this.fetchBlock(currentBlock.x, currentBlock.y - 1);
+			currentBlock.children.push(child);
+			this.list.push(child);
+		}  
+
+		if (this.canMoveRight(currentBlock)) {
+			child = this.fetchBlock(currentBlock.x + 1, currentBlock.y);
+			currentBlock.children.push(child);
+			this.list.push(child);
+		} 
+
+		if (this.canMoveUp(currentBlock)) {
+			child = this.fetchBlock(currentBlock.x, currentBlock.y + 1)
+			currentBlock.children.push(child);
+			this.list.push(child);	
+		} 
+
+		currentBlock.explored = true;
+	},
+
+	fetchBlock: function(x, y) {
+		for (var i = 0; i < this.blocks.length; i++) {
+			if ((this.blocks[i].x == x ) && (this.blocks[i].y == y )) 
+				return this.blocks[i];
+		}
+	},
+
+	canMoveUp: function(currentBlock) {
+		return this.validMove(currentBlock.x, currentBlock.y + 1);
+	},
+
+	canMoveDown: function(currentBlock) {
+		return this.validMove(currentBlock.x, currentBlock.y - 1);
+	},
+	
+	canMoveLeft: function(currentBlock) {
+		return this.validMove(currentBlock.x -1, currentBlock.y);
+	},
+		
+	canMoveRight: function(currentBlock) {
+		return this.validMove(currentBlock.x + 1, currentBlock.y);
+	},
+
+	validMove: function(x, y) {
+		for (var i = 0; i < this.blocks.length; i++) {
+			if ((this.blocks[i].x == x ) && 
+				(this.blocks[i].y == y ) &&
+				(!this.blocks[i].isWall) &&
+				(!this.blocks[i].isMine) &&
+				(!this.blocks[i].explored))
+			return true;
+		} return false;
+	},
+
+	run: function() {
+		this.init();
+		
+		console.log("run: STARTING LIST");
+		console.log(this.list);
+		console.log(this.list.length);
+
+		while (currentBlock = this.list.shift()) {
+			console.log("New node: ");
+			console.log(currentBlock);
+			
+			if (!currentBlock.isExit) {
+				this.explore(currentBlock);
+			} else {
+				console.log("We found the exit!");
+				console.log(currentBlock);
+			}
+
+			console.log("Grabbing next node to explore..");
+		}
+
+	}
+}
+
+
+
+
+
+
+
+
+
+
+view = {
+	init: function() {
+		console.log("View initializing.");
+		
+		this.canvas 	= document.getElementById("canvas");
+		this.ctx	 	= this.canvas.getContext('2d');
+		this.settings 	= controller.getSettings();
+		
+		this.render();
+		
+	},
+
+	render: function() {
+		console.log("View rendering.");
+
+		var ctx 		= this.ctx;
+		var settings 	= this.settings;
+		var blocks  	= controller.getBlocks();
+		
+		for (var i = 0; i < blocks.length; i++) {
+		
+			if (blocks[i].isMine) {
+				ctx.fillStyle = "red";
+			} else if ((blocks[i].isEntry) || (blocks[i].isExit)) {
+				ctx.fillStyle = "#a858ff";
+			} else if (blocks[i].isWall) {
+				ctx.fillStyle = "black";
+			} else ctx.fillStyle = "#6d6ddf";
+
+			ctx.fillRect(
+				blocks[i].x * (settings.blockSize + settings.blockGap), 
+				blocks[i].y * (settings.blockSize + settings.blockGap), 
+				settings.blockSize,
+				settings.blockSize
+			);
+		}
+	},
+
+	renderGreen: function(block) {
+		var settings  = this.settings;
+
+		ctx.fillStyle = "green";
+
+		ctx.fillRect(
+				block.x * (settings.blockSize + settings.blockGap), 
+				block.y * (settings.blockSize + settings.blockGap), 
+				settings.blockSize,
+				settings.blockSize
+			);
+	}
+}
+
+
+
+
+
+
+
+
+
+function Block(x, y, isMine = false, isWall = false) {
+  	this.x = x;
+  	this.y = y;
+  	this.explored = false;
+  	this.children = [];
+
+  	if (isWall) 
+  		isMine = false;
+  	
+  	this.isMine = isMine;
+  	this.isWall = isWall;
+}	
+
+
+
+
+
+
+
+controller.init();
+
+
+
+</script>
+</html>
