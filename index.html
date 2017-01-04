@@ -3,7 +3,7 @@
 <head>
 	<title>MineSearcher</title>
 
-	<link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Istok+Web|Lemonada|Tinos:700i|Yellowtail" rel="stylesheet">
+	<!-- <link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Istok+Web|Lemonada|Tinos:700i|Yellowtail" rel="stylesheet"> -->
 
 	<style type="text/css">
 		
@@ -20,6 +20,17 @@
 			/*border: 2px solid grey;*/
 		}
 
+		#details {
+			position: fixed;
+			left: 50%;
+			top: 0;
+			width: 50%;
+			height: 95%;
+			background: #eee;
+			padding: 10px 15px;
+			overflow: scroll;
+		}
+
 	</style>
 </head>
 <body>
@@ -28,14 +39,10 @@
 
 	<canvas id="canvas" height="500" width="500"></canvas>
 
-	<br>
+	<button onclick="BFS.run()">render</button>
+	
+	<div id="details"></div>
 
-	<button onclick="view.render()">render</button>
-
-	<h4>BFS data</h4>
-	Current position: <div id="current-position"></div> <br>
-	Children: <div id="children"></div> <br>
-	Parent: <div id="parent"></div> <br>
 </body>
 
 
@@ -232,10 +239,16 @@ BFS = {
 
 		while (currentBlock = this.list.shift()) {
 			console.log("New node: ");
-			console.log(currentBlock);
+			
+			// LOG IT
+			send(currentBlock.x + ", " + currentBlock.y);
 			
 			if (!currentBlock.isExit) {
-				this.explore(currentBlock);
+				// Sleep it so it's chill
+				window.setTimeout(function() {
+					this.explore(currentBlock);
+				}, 300);
+
 			} else {
 				console.log("We found the exit!");
 				complete = true;
@@ -250,7 +263,6 @@ BFS = {
 		if (!complete) {
 			console.log("NO PATH AVAILABLE YOU DED M9");
 		}
-
 	}
 }
 
@@ -337,6 +349,11 @@ function Block(x, y, isMine = false, isWall = false) {
 }	
 
 
+
+function send(msg) {
+	var details = document.getElementById("details");
+	details.innerHTML += "<br>" + msg;
+}
 
 
 
