@@ -39,7 +39,7 @@
 
 	<canvas id="canvas" height="500" width="500"></canvas>
 
-	<button onclick="BFS.run()">render</button>
+	<button onclick="BFS.init()">render</button>
 	
 	<div id="details"></div>
 
@@ -53,9 +53,9 @@
 	
 
 model = {
-	blockSize: 		20,
-	blockGap: 		5,
-	minefieldSize: 	10,
+	blockSize: 		1,
+	blockGap: 		0,
+	minefieldSize: 	500,
 	blockDensity: 	0.3,
 	blocks: 		[],
 	entry: 			[],
@@ -143,14 +143,15 @@ controller = {
 
 BFS = {
 	init: function() {
-		this.blocks = controller.getBlocks();
-		this.list	= [];
+		this.blocks 		= controller.getBlocks();
+		this.list			= [];
+		this.exploredList 	= [];
 
 		// Find the entrance and add the node to list 
 		// so we can get started
 		for (var i = 0; i < this.blocks.length; i++) {
 			if (this.blocks[i].isEntry) {
-				console.log("init: adding first node to list");
+				console.log("init: adding entrance as first node to list");
 				console.log(this.blocks[i]);
 
 				this.list.push(this.blocks[i]);
@@ -160,6 +161,8 @@ BFS = {
 
 		console.log("init: STARTING LIST");
 		console.log(this.list);
+
+		this.run();
 
 	},
 
@@ -191,6 +194,7 @@ BFS = {
 			this.list.push(child);	
 		} 
 
+		this.exploredList.push(currentBlock);
 		currentBlock.explored = true;
 	},
 
@@ -229,7 +233,6 @@ BFS = {
 	},
 
 	run: function() {
-		this.init();
 		
 		complete = false;
 
@@ -237,32 +240,43 @@ BFS = {
 		console.log(this.list);
 		console.log(this.list.length);
 
-		while (currentBlock = this.list.shift()) {
-			console.log("New node: ");
-			
-			// LOG IT
+
+
+		if (currentBlock = this.list.shift()) {
+			if (currentBlock.explored) {
+				while (currentBlock.explored) 
+					currentBlock = this.list.shift();
+			}
+
 			send(currentBlock.x + ", " + currentBlock.y);
-			
+
 			if (!currentBlock.isExit) {
+
+				
+				this.explore(currentBlock);
+
+				view.renderTree(this.exploredList);
+				view.renderGreen(currentBlock);
+
 				// Sleep it so it's chill
-				window.setTimeout(function() {
-					this.explore(currentBlock);
-				}, 300);
+				setTimeout(function() {
+					BFS.run();
+				}, 0);
 
 			} else {
 				console.log("We found the exit!");
+				return;
 				complete = true;
 				console.log(currentBlock);
-				break;
 			}
 
-			console.log("List size: " + this.list.length);
-			console.log("Grabbing next node to explore..");
-		} 
-
-		if (!complete) {
-			console.log("NO PATH AVAILABLE YOU DED M9");
+			if (!complete) {
+				console.log("NO PATH AVAILABLE YOU DED M9");
+			}
+		} else {
+			console.log("Finished.");
 		}
+
 	}
 }
 
@@ -315,15 +329,42 @@ view = {
 
 	renderGreen: function(block) {
 		var settings  = this.settings;
+		var ctx 	  = this.ctx;
 
 		ctx.fillStyle = "green";
 
 		ctx.fillRect(
-				block.x * (settings.blockSize + settings.blockGap), 
-				block.y * (settings.blockSize + settings.blockGap), 
+			block.x * (settings.blockSize + settings.blockGap), 
+			block.y * (settings.blockSize + settings.blockGap), 
+			settings.blockSize,
+			settings.blockSize
+		);
+	},
+
+	renderTree: function(tree) {
+		var settings  = this.settings;
+		var ctx 	  = this.ctx;
+
+		for (var i = 0; i < tree.length; i++) {
+			ctx.fillStyle = "black";
+			ctx.fillRect(
+				tree[i].x * (settings.blockSize + settings.blockGap), 
+				tree[i].y * (settings.blockSize + settings.blockGap), 
 				settings.blockSize,
 				settings.blockSize
 			);
+			
+			for (var k = 0; k < tree[i].children.length; k++) {
+				ctx.fillStyle = "orange";
+				ctx.fillRect(
+					tree[i].children[k].x * (settings.blockSize + settings.blockGap), 
+					tree[i].children[k].y * (settings.blockSize + settings.blockGap), 
+					settings.blockSize,
+					settings.blockSize
+				);
+			}
+		}
+
 	}
 }
 
