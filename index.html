@@ -3,13 +3,14 @@
 <head>
 	<title>MineSearcher</title>
 
-	<!-- <link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Istok+Web|Lemonada|Tinos:700i|Yellowtail" rel="stylesheet"> -->
+	<link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Istok+Web|Lemonada|Tinos:700i|Yellowtail" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
 
 	<style type="text/css">
 		
 		body {
-			font-family: "Istok Web";
-			font-size: 14px;
+			font-family: "Roboto";
+			font-size: 16px;
 		}
 
 		h1, h2, h3, h4, h5 {
@@ -20,10 +21,21 @@
 			/*border: 2px solid grey;*/
 		}
 
-		#details {
+		#settings {
 			position: fixed;
 			left: 50%;
 			top: 0;
+			width: 50%;
+			height: auto;
+			background: #eee;
+			padding: 10px 15px;
+			overflow: scroll;
+		}
+
+		#details {
+			position: fixed;
+			left: 50%;
+			top: 100px;
 			width: 50%;
 			height: 95%;
 			background: #eee;
@@ -31,16 +43,43 @@
 			overflow: scroll;
 		}
 
+		#controls {
+			position: fixed;
+		    bottom: 0;
+		    left: 0;
+		    background: #338fe4;
+		    border: 0;
+		    border-bottom: 2px solid #2c7bc4;
+		}
+
+		#controls button {
+		    padding: 10px 15px;
+			background: transparent;
+			border: 0;
+			color: white;
+			outline: none;
+		}
+
+		#controls button:hover {
+			background: rgba(0, 0, 0, 0.2);
+			cursor: pointer;
+		}
+
+
 	</style>
 </head>
 <body>
 
 <h1>MineSearcher</h1>
 
-	<canvas id="canvas" height="500" width="500"></canvas>
+	<canvas id="canvas" height="800" width="800"></canvas>
 
-	<button onclick="BFS.init()">render</button>
+	<div id="controls">
+		<button id="render" onclick="BFS.init()">Start</button>
+		<button id="newMinefield" onclick="controller.init()">New Minefield</button>
+	</div>
 	
+	<div id="settings"></div>
 	<div id="details"></div>
 
 </body>
@@ -53,10 +92,11 @@
 	
 
 model = {
-	blockSize: 		1,
-	blockGap: 		0,
-	minefieldSize: 	500,
-	blockDensity: 	0.3,
+	blockSize: 		15,
+	blockGap: 		2,
+	minefieldSize: 	40,
+	blockDensity: 	0.2,
+	searchSpeed: 	0,
 	blocks: 		[],
 	entry: 			[],
 	exit: 			[],
@@ -76,6 +116,8 @@ controller = {
 	},
 
 	generateBlocks: function() {
+		model.blocks = [];
+
 		for (x = 0; x < model.minefieldSize; x++) {
 			for (y = 0; y < model.minefieldSize; y++) {
 				model.blocks.push(new Block(x, y, Math.random() < model.blockDensity, this.isWall(x, y, model.minefieldSize)));
@@ -122,7 +164,8 @@ controller = {
 			blockSize:  	model.blockSize,
 			blockGap:  		model.blockGap,
 			minefieldSize:  model.minefieldSize,
-			blockDensity:  	model.blockDensity
+			blockDensity:  	model.blockDensity,
+			searchSpeed: 	model.searchSpeed
 		}
 	},
 
@@ -146,24 +189,18 @@ BFS = {
 		this.blocks 		= controller.getBlocks();
 		this.list			= [];
 		this.exploredList 	= [];
+		this.settings 		= controller.getSettings();
 
 		// Find the entrance and add the node to list 
 		// so we can get started
 		for (var i = 0; i < this.blocks.length; i++) {
 			if (this.blocks[i].isEntry) {
-				console.log("init: adding entrance as first node to list");
-				console.log(this.blocks[i]);
-
 				this.list.push(this.blocks[i]);
 				break;
 			}
 		}
 
-		console.log("init: STARTING LIST");
-		console.log(this.list);
-
 		this.run();
-
 	},
 
 
@@ -172,26 +209,42 @@ BFS = {
 	explore: function(currentBlock) {
 		if (this.canMoveLeft(currentBlock)) {
 			child = this.fetchBlock(currentBlock.x - 1, currentBlock.y);
-			currentBlock.children.push(child);
-			this.list.push(child);
+			if (!child.queued) {
+				child.parent = currentBlock;
+				currentBlock.children.push(child);
+				this.list.push(child);
+				child.queued = true;
+			}
 		}  
 
 		if (this.canMoveDown(currentBlock)) {
 			child = this.fetchBlock(currentBlock.x, currentBlock.y - 1);
-			currentBlock.children.push(child);
-			this.list.push(child);
+			if (!child.queued) {
+				child.parent = currentBlock;
+				currentBlock.children.push(child);
+				this.list.push(child);
+				child.queued = true;
+			}
 		}  
 
 		if (this.canMoveRight(currentBlock)) {
 			child = this.fetchBlock(currentBlock.x + 1, currentBlock.y);
-			currentBlock.children.push(child);
-			this.list.push(child);
+			if (!child.queued) {
+				child.parent = currentBlock;
+				currentBlock.children.push(child);
+				this.list.push(child);
+				child.queued = true;
+			}
 		} 
 
 		if (this.canMoveUp(currentBlock)) {
-			child = this.fetchBlock(currentBlock.x, currentBlock.y + 1)
-			currentBlock.children.push(child);
-			this.list.push(child);	
+			child = this.fetchBlock(currentBlock.x, currentBlock.y + 1);
+			if (!child.queued) {
+				child.parent = currentBlock;
+				currentBlock.children.push(child);
+				this.list.push(child);	
+				child.queued = true;
+			}
 		} 
 
 		this.exploredList.push(currentBlock);
@@ -232,36 +285,46 @@ BFS = {
 		} return false;
 	},
 
+	printList: function(list) {
+		for (var i = 0; i < list.length; i++) {
+			console.log(list[i].explored);
+			console.log("[" + list[i].x + ", " + list[i].y + "]:" + list[i].queued);
+
+		}	
+
+		console.log("--------");
+	},
+
+	getTree: function(block) {
+
+	},
+
 	run: function() {
-		
-		complete = false;
-
-		console.log("run: STARTING LIST");
-		console.log(this.list);
-		console.log(this.list.length);
-
-
 
 		if (currentBlock = this.list.shift()) {
+			console.log("SPEED: " + this.settings.searchSpeed);
+
 			if (currentBlock.explored) {
 				while (currentBlock.explored) 
 					currentBlock = this.list.shift();
 			}
 
-			send(currentBlock.x + ", " + currentBlock.y);
+			view.renderGreen(currentBlock);
+			
+			send(this.exploredList.length);
 
 			if (!currentBlock.isExit) {
 
 				
+				view.renderTree(this.exploredList);
 				this.explore(currentBlock);
 
-				view.renderTree(this.exploredList);
-				view.renderGreen(currentBlock);
-
 				// Sleep it so it's chill
+
+				this.printList(this.list);
 				setTimeout(function() {
 					BFS.run();
-				}, 0);
+				}, this.settings.searchSpeed);
 
 			} else {
 				console.log("We found the exit!");
@@ -270,11 +333,8 @@ BFS = {
 				console.log(currentBlock);
 			}
 
-			if (!complete) {
-				console.log("NO PATH AVAILABLE YOU DED M9");
-			}
-		} else {
-			console.log("Finished.");
+				
+			
 		}
 
 	}
@@ -364,8 +424,21 @@ view = {
 				);
 			}
 		}
+	},
 
-	}
+	renderBlock: function(block, colour) {
+		this.ctx.fillStyle = colour;
+		this.ctx.fillRect(
+			block[i].x * (this.settings.blockSize + this.settings.blockGap), 
+			block[i].y * (this.settings.blockSize + this.settings.blockGap), 
+			this.settings.blockSize,
+			this.settings.blockSize
+		);
+	},
+
+	renderFinalPath: function(exitBlock) {
+
+	},
 }
 
 
