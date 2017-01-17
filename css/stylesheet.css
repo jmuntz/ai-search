@@ -1,0 +1,57 @@
+
+body {
+	font-family: "Roboto";
+	font-size: 16px;
+}
+
+h1, h2, h3, h4, h5 {
+	font-family: "Lemonada";
+}
+
+canvas {
+	/*border: 2px solid grey;*/
+}
+
+#settings {
+	position: fixed;
+	left: 50%;
+	top: 0;
+	width: 50%;
+	height: auto;
+	background: #eee;
+	padding: 10px 15px;
+	overflow: scroll;
+}
+
+#details {
+	position: fixed;
+	left: 50%;
+	top: 100px;
+	width: 50%;
+	height: 95%;
+	background: #eee;
+	padding: 10px 15px;
+	overflow: scroll;
+}
+
+#controls {
+	position: fixed;
+    bottom: 0;
+    left: 0;
+    background: #338fe4;
+    border: 0;
+    border-bottom: 2px solid #2c7bc4;
+}
+
+#controls button {
+    padding: 10px 15px;
+	background: transparent;
+	border: 0;
+	color: white;
+	outline: none;
+}
+
+#controls button:hover {
+	background: rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+}
