@@ -1,48 +1,14 @@
 controller = {
 
 	init: function() {
-		this.generateBlocks();	
+		this.generateNodes();	
 		view.init();
 	},
 
-	generateBlocks: function() {
-		model.blocks = [];
+	
 
-		for (x = 0; x < model.minefieldSize; x++) {
-			for (y = 0; y < model.minefieldSize; y++) {
-				model.blocks.push(new Block(x, y, Math.random() < model.blockDensity, this.isWall(x, y, model.minefieldSize)));
-			}
-		} this.addExits();
-	},
-
-	addExits: function() {
-
-		// Generate random entry/exit points
-		entry  	= [this.getRandomIntInclusive(1, model.minefieldSize -2), 0];
-		exit 	= [this.getRandomIntInclusive(1, model.minefieldSize -2), model.minefieldSize -1];
-
-		for (var i = 0; i < model.blocks.length; i++) {
-			if ((model.blocks[i].x == entry[0]) && (model.blocks[i].y == entry[1])) {
-				model.blocks[i].isEntry = true; 
-				model.blocks[i].isWall = false; 
-				break;
-			}
-		}
-
-		for (var i = 0; i < model.blocks.length; i++) {
-			if ((model.blocks[i].x == exit[0]) && (model.blocks[i].y == exit[1])) {
-				model.blocks[i].isExit = true; 
-				model.blocks[i].isWall = false; 
-				break;
-			}
-		}
-
-		model.entry = entry;
-		model.exit = exit;
-	},
-
-	getBlocks: function() {
-		return model.blocks;
+	getNodes: function() {
+		return model.nodes;
 	},
 
 	getEntry: function() {
@@ -51,10 +17,10 @@ controller = {
 
 	getSettings: function() {
 		return settings = {
-			blockSize:  	model.blockSize,
-			blockGap:  		model.blockGap,
+			nodeSize:  	model.nodesize,
+			nodeGap:  		model.nodeGap,
 			minefieldSize:  model.minefieldSize,
-			blockDensity:  	model.blockDensity,
+			nodeDensity:  	model.nodeDensity,
 			searchSpeed: 	model.searchSpeed
 		}
 	},
@@ -67,5 +33,86 @@ controller = {
 
 	isWall: function(x, y, minefieldSize) {
 		return ((x == 0) || (x == model.minefieldSize -1) || (y == 0) || y == (model.minefieldSize -1));
+	},
+
+	fetchnode: function(x, y) {
+		for (var i = 0; i < this.nodes.length; i++) {
+			if ((this.nodes[i].x == x ) && (this.nodes[i].y == y )) 
+				return this.nodes[i];
+		}
+	},
+
+	// LEFT > DOWN > RIGHT > UP
+	explore: function(node) {
+		if (this.canMoveLeft(node)) {
+			child = controller.fetchBlock(node.x - 1, node.y);
+			if (!child.queued) { // Check if child is already in the queue from a neighbouring block. 
+				child.parent = node;
+				node.children.push(child);
+				this.list.push(child);
+				child.queued = true;
+			}	
+		}  
+
+		if (this.canMoveDown(node)) {
+			child = controller.fetchBlock(node.x, node.y - 1);
+			if (!child.queued) {
+				child.parent = node;
+				node.children.push(child);
+				this.list.push(child);
+				child.queued = true;
+			}
+		}  
+
+		if (this.canMoveRight(node)) {
+			child = controller.fetchBlock(node.x + 1, node.y);
+			if (!child.queued) {
+				child.parent = node;
+				node.children.push(child);
+				this.list.push(child);
+				child.queued = true;
+			}
+		} 
+
+		if (this.canMoveUp(node)) {
+			child = controller.fetchBlock(node.x, node.y + 1);
+			if (!child.queued) {
+				child.parent = node;
+				node.children.push(child);
+				this.list.push(child);	
+				child.queued = true;
+			}
+		} 
+
+		this.exploredList.push(node);
+		node.explored = true;
+	},
+
+	canMoveUp: function(node) {
+		return this.validMove(node.x, node.y + 1);
+	},
+
+	canMoveDown: function(node) {
+		return this.validMove(node.x, node.y - 1);
+	},
+	
+	canMoveLeft: function(node) {
+		return this.validMove(node.x -1, node.y);
+	},
+		
+	canMoveRight: function(node) {
+		return this.validMove(node.x + 1, node.y);
 	}
+	
+
+	validMove: function(x, y) {
+		for (var i = 0; i < this.nodes.length; i++) {
+			if ((this.nodes[i].x == x ) && 
+				(this.nodes[i].y == y ) &&
+				(!this.nodes[i].isWall) &&
+				(!this.nodes[i].isMine) &&
+				(!this.nodes[i].explored))
+			return true;
+		} return false;
+	},
 }

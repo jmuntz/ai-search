@@ -11,47 +11,57 @@ view = {
 	},
 
 	render: function() {
-		var blocks  	= controller.getBlocks();
+		var node  	= controller.getNode();
 		
-		for (var i = 0; i < blocks.length; i++) {
+		for (var i = 0; i < node.length; i++) {
 		
-			if (blocks[i].isMine) {
+			if (node[i].isMine) {
 				colour = "red";
-			} else if ((blocks[i].isEntry) || (blocks[i].isExit)) {
+			} else if ((node[i].isEntry) || (node[i].isExit)) {
 				colour = "#a858ff";
-			} else if (blocks[i].isWall) {
+			} else if (node[i].isWall) {
 				colour = "black";
 			} else colour = "#6d6ddf";
 
-			this.renderBlock(colour, blocks[i]);
+			this.renderNode(node[i], colour);
 		}
 	},
 
 	renderTree: function(tree) {
 		for (var i = 0; i < tree.length; i++) {
-			this.renderBlock("black", tree[i]);
+			this.renderNode(tree[i], "black");
 
 			for (var k = 0; k < tree[i].children.length; k++) {
-				this.renderBlock("orange", tree[i].children[k])
+				this.renderNode(tree[i].children[k], "orange")
 			}
 		}
 	},
 
-	renderBlock: function(block, colour) {
+	renderNode: function(node, colour) {
 		this.ctx.fillStyle = colour;
 		this.ctx.fillRect(
-			block.x * (this.settings.blockSize + this.settings.blockGap), 
-			block.y * (this.settings.blockSize + this.settings.blockGap), 
-			this.settings.blockSize,
-			this.settings.blockSize
+			node.x * (this.settings.nodeSize + this.settings.nodeGap), 
+			node.y * (this.settings.nodeSize + this.settings.nodeGap), 
+			this.settings.nodeSize,
+			this.settings.nodeSize
 		);
 	},
 
-	renderFinalPath: async function(exitBlock) {
-		while (!exitBlock.isEntry) {
-			view.renderBlock(exitBlock, "pink");
-			exitBlock = exitBlock.parent;
+	renderFinalPath: async function(exitNode) {
+		while (!exitNode.isEntry) {
+			view.renderNode(exitNode, "pink");
+			exitNode = exitNode.parent;
 			await sleep(50);
-		} view.renderBlock(exitBlock, "pink");
+		} view.renderNode(exitNode, "pink");
+	},
+
+	printList: function(list) {
+		for (var i = 0; i < list.length; i++) {
+			console.log(list[i].explored);
+			console.log("[" + list[i].x + ", " + list[i].y + "]:" + list[i].queued);
+
+		}	
+
+		console.log("--------");
 	},
 }
