@@ -3,8 +3,8 @@
 <head>
 	<title>MineSearcher</title>
 
-	<link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Istok+Web|Lemonada|Tinos:700i|Yellowtail" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+	<!-- <link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Istok+Web|Lemonada|Tinos:700i|Yellowtail" rel="stylesheet"> -->
+	<!-- <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet"> -->
 
 	<link rel="stylesheet" type="text/css" href="css/stylesheet">
 
@@ -16,24 +16,29 @@
 	<canvas id="canvas" height="800" width="800"></canvas>
 
 	<div id="controls">
-		<button id="render" onclick="BFS.init()">Start</button>
-		<button id="newMinefield" onclick="controller.init()">New Minefield</button>
+		<button class="search-btn" onclick="controller.search('BFS')">BFS</button>
+		<button class="search-btn" onclick="controller.search('DFS')">DFS</button>
+		<button class="search-btn" disabled onclick="controller.search('GBFS')">GBFS</button>
+		<button class="search-btn" disabled onclick="controller.search('AStar')">A*</button>
+		<button id="newGrid" onclick="controller.init()">New Grid</button>
 	</div>
 	
-	<div id="settings"></div>
 	<div id="details"></div>
 
 </body>
 
 
-
 <script src="js/model.js"></script>
 <script src="js/Node.js"></script>
-<script src="js/controller.js"></script>
+<script src="js/Grid.js"></script>
+<script src="js/Algorithm.js"></script>
 <script src="js/view.js"></script>
-<script src="js/search.js"></script>
-<script src="js/app.js"></script>
+<script src="js/controller.js"></script>
 
+
+<script type="text/javascript">
+	controller.init();
+</script>
 
 
 

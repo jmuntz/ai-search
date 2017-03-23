@@ -12,17 +12,6 @@ canvas {
 	/*border: 2px solid grey;*/
 }
 
-#settings {
-	position: fixed;
-	left: 50%;
-	top: 0;
-	width: 50%;
-	height: auto;
-	background: #eee;
-	padding: 10px 15px;
-	overflow: scroll;
-}
-
 #details {
 	position: fixed;
 	left: 50%;
@@ -32,6 +21,12 @@ canvas {
 	background: #eee;
 	padding: 10px 15px;
 	overflow: scroll;
+}
+
+#details span {
+    width: 100px;
+    display: inline-block;
+    font-weight: bold;
 }
 
 #controls {
@@ -55,3 +50,42 @@ canvas {
 	background: rgba(0, 0, 0, 0.2);
 	cursor: pointer;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
