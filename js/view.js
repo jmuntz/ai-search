@@ -48,7 +48,7 @@ view = {
 		while (!exitNode.isEntry && !controller.stop) {
 			view.renderNode(exitNode, "#52ff9c");
 			exitNode = exitNode.parent;
-			await this.sleep(50);
+			await this.sleep(20);
 		} view.renderNode(exitNode, "#52ff9c");
 	},
 
