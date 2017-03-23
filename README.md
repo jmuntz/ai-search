@@ -8,3 +8,4 @@ Finds a path through a randomly generated maze using a range of AI search algori
 * Add GBFS
 * Add A*
 * Add settings GUI
+* Change canvas dynamically based on grid size
