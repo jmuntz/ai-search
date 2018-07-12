@@ -16,14 +16,18 @@ var Algorithm = function(type, grid) {
 	} 
 
 	// Send some stats to the view
-	send(
-		arr = [
-			"<span>Nodes:</span> " + this.list.length,
-			"<span>Explored:</span> " + this.exploredList.length,
-			"<span>Total nodes:</span> " + this.grid.nodes.length,
-			"<span>Grid size:</span> " + this.grid.width + " x " + this.grid.height
-		]
-	);
+	
+	data = [
+		this.list.length,
+		this.exploredList.length,
+		this.grid.nodes.length,
+		this.grid.width,
+		this.grid.height,
+	]
+	
+	send(data);
+
+	controller.printDetails(data);
 
 	// Make this async so we can add a sleep timer
 	// without ballsing it up with a recursive setTimeout
@@ -39,15 +43,18 @@ var Algorithm = function(type, grid) {
 
 			// Send some stats to the view
 			// because stats
-			send(
-				arr = [
-					("<span>Time taken:</span> " + ((Date.now() - this.startTime) /1000) + "s"),
-					"<span>Nodes:</span> " + this.list.length,
-					"<span>Explored:</span> " + this.exploredList.length,
-					"<span>Total nodes:</span> " + this.grid.nodes.length,
-					"<span>Grid size:</span> " + this.grid.width + " x " + this.grid.height
-				]
-			);
+			data = [
+				this.list.length,
+				this.exploredList.length,
+				this.grid.nodes.length,
+				this.grid.width,
+				this.grid.height,
+				(((Date.now() - this.startTime) /1000))
+			]
+			
+			send(data);
+
+			controller.printDetails(data);
 
 			// If we our current node is not the exit then
 			// we render the current tree and explore the node
@@ -64,15 +71,19 @@ var Algorithm = function(type, grid) {
 
 			} else { //We found the exit.. let's do stats and render the path
 				this.endTime = Date.now();
-				send(
-					arr = [
-						"<span>Nodes:</span> " + this.list.length,
-						"<span>Explored:</span> " + this.exploredList.length,
-						"<span>Total nodes:</span> " + this.grid.nodes.length,
-						"<span>Grid size:</span> " + this.grid.width + " x " + this.grid.height,
-						("<span>Time taken:</span> " + ((this.endTime - this.startTime) /1000) + "s")
-					]
-				);
+				
+				data = [
+					this.list.length,
+					this.exploredList.length,
+					this.grid.nodes.length,
+					this.grid.width,
+					this.grid.height,
+					(((this.endTime - this.startTime) /1000))
+				]
+				
+				send(data);
+
+				controller.printDetails(data);
 
 				view.renderFinalPath(currentNode);
 				return true

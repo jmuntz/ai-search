@@ -4,7 +4,7 @@
 	<title>MineSearcher</title>
 
 	<link href="https://fonts.googleapis.com/css?family=Baloo+Thambi|Istok+Web|Lemonada|Tinos:700i|Yellowtail" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300,700" rel="stylesheet">
 
 	<link rel="stylesheet" type="text/css" href="css/stylesheet.css">
 
@@ -15,16 +15,47 @@
 
 	<canvas id="canvas" height="400" width="600"></canvas>
 
-	<div id="controls">
-		<button class="search-btn" onclick="controller.search('BFS')">BFS</button>
-		<button class="search-btn" onclick="controller.search('DFS')">DFS</button>
-		<button class="search-btn" disabled onclick="controller.search('GBFS')">GBFS</button>
-		<button class="search-btn" disabled onclick="controller.search('AStar')">A*</button>
-		<button id="newGrid" onclick="controller.init()">New Grid</button>
-	</div>
-	
-	<div id="details"></div>
+	<div id="log"></div>
 
+	<div id="control-panel">
+		<div id="details">
+			Time Taken: - <br>
+			Grid size: -<br>
+			Total nodes: -<br>
+			Explored: -<br>
+			Nodes: -<br>
+
+		</div>
+		<div id="controls">
+			<div class="control">
+				<label for="grid-height">Grid height: </label>
+				<input id="grid-height" type="number" min="5" max="100" name="grid-height" onchange="if (this.value > 0) controller.setGridHeight(this.value)" />
+			</div>
+			<div class="control">
+				<label for="grid-width">Grid width: </label>
+				<input id="grid-width" type="number" min="5" max="100" name="grid-width" onchange="if (this.value > 0) controller.setGridWidth(this.value)" />
+			</div>
+			
+			<div class="control">
+				<label for="node-size">Node size: </label>
+				<input id="node-size" type="number" name="node-size" onchange="if (this.value > 0) controller.setNodeSize(this.value);";/>
+			</div>
+
+			<div class="control">
+				<label for="algo-select">Select search type: </label>
+				<select id="algo-select" onchange="if (this.selectedIndex != -1) controller.setAlgo(this.value)";>
+					<option selected value="bfs">BFS</option>
+					<option value="dfs">DFS</option>
+					<option disabled value="gbfs">GBFS</option>
+					<option disabled value="astar">A*</option>
+				</select>
+			</div>
+			<br>
+			<button id="start" onclick="controller.search(model.algo)">Start</button>
+
+			<button id="newGrid" onclick="controller.init()">New Grid</button>
+		</div>
+	</div>
 </body>
 
 

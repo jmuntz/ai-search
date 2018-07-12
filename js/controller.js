@@ -8,6 +8,7 @@ controller = {
 		grid.generate();
 
 		view.init();
+		view.printDetails(model);
 		view.render(grid);
 
 		this.grid = grid;
@@ -29,15 +30,45 @@ controller = {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	},
 
-	search: function(type) {
+	setAlgo: function(algo) {
+		model.algo = algo;
+		console.log("Setting algo: " + algo);
+	},
+
+	setGridHeight: function(height) {
+		model.gridSize[1] = height;
+	},
+
+	setGridWidth: function(width) {
+		model.gridSize[0] = width;
+	},
+
+	setNodeSize: function(num) {
+		model.nodeSize = parseInt(num);
+	},
+
+	getAlgo: function() {
+		return model.algo;
+	},
+
+	printDetails: function(data) {
+		view.printDetails(data);
+	},
+
+	getModel: function() {
+		return model;
+	},
+
+	search: function(algo) {
 		controller.stop = false;
-		if ((type === "BFS") || (type === "DFS")) {
-			this.algorithm = new Algorithm(type, this.grid); 
+		algo = algo.toUpperCase();
+		if ((algo === "BFS") || (algo === "DFS")) {
+			this.algorithm = new Algorithm(algo, this.grid); 
 		 	
 		 	this.algorithm.run();
 
 		} else {
-			console.log("Algorithm not supported. Stopping."); 	
+			console.log("Algorithm (" + algo + ") not supported. Stopping."); 	
 		} 
 	}
 }
