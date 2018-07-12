@@ -15,8 +15,6 @@ view = {
 		this.settings 	= controller.getSettings();
 
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-		this.initControls();
 	},
 
 	render: function(grid) {
@@ -93,3 +91,5 @@ view = {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 }
+
+view.initControls();
