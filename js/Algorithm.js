@@ -81,11 +81,15 @@ var Algorithm = function(type, grid) {
 					(((this.endTime - this.startTime) /1000))
 				]
 				
-				send(data);
 
 				controller.printDetails(data);
 
 				view.renderFinalPath(currentNode);
+
+				console.log("TIME TAKEN: ")
+				console.log((this.endTime - this.startTime) / 1000);
+				console.log(this.startTime);
+				console.log(this.endTime);
 				return true
 			} 
 

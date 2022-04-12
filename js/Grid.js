@@ -40,8 +40,6 @@ var Grid = function(width, height) {
 		return nodes;
 	};
 
-
-
 	this.getNode = function(x, y) {
 		for (var i = 0; i < this.nodes.length; i++) {
 			if ((this.nodes[i].x == x ) && (this.nodes[i].y == y )) 

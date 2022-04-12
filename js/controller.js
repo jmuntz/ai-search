@@ -1,6 +1,14 @@
 controller = {
 
-	init: function() {
+	init: async function() {
+		view.initControls();
+		view.loadAssets();
+
+		while (!view.assetsLoaded) {
+			await view.sleep(200);
+			console.log(view.assetsLoaded)
+		}
+		console.log('Assets loaded.');
 		this.stop = true;
 
 		grid = new Grid(model.gridSize[0], model.gridSize[1]);
@@ -12,6 +20,7 @@ controller = {
 		view.render(grid);
 
 		this.grid = grid;
+		console.log("Loading complete.");
 	},
 
 	getSettings: function() {

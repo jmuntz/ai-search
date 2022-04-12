@@ -1,4 +1,9 @@
-function send(str) {
+const 	brick_asset = new Image();
+		brick_asset.src = 'img/brick.jpg';
+const 	grass_asset = new Image();
+		grass_asset.src = 'img/grass.jpg';		
+
+	function send(str) {
 	var log = document.getElementById("log");
 	tmp = log.innerHTML;
 	log.innerHTML = str + "<br>" + tmp;
@@ -13,8 +18,19 @@ view = {
 		this.canvas 	= document.getElementById("canvas");
 		this.ctx	 	= this.canvas.getContext('2d');
 		this.settings 	= controller.getSettings();
-
+		
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	},
+
+	loadAssets: async function() {
+		count = 0;
+
+		while ((!brick_asset.complete || !grass_asset) && count < 10) {
+			await this.sleep(200);
+			count++;
+		}
+
+		this.assetsLoaded = true;
 	},
 
 	render: function(grid) {
@@ -23,45 +39,62 @@ view = {
 		}
 	},
 
-	renderTree: function(tree) {
-		for (var i = 0; i < tree.length; i++) {
-			this.renderNode(tree[i]);
-			for (var k = 0; k < tree[i].children.length; k++) {
-				if (!tree[i].children[k].explored) this.renderNode(tree[i].children[k], "orange");
-			}
-		}
-	},
 
 	renderNode: function(node, colour = false) {
-		if (!colour) 
-		 	 this.ctx.fillStyle = this.getNodeColour(node);
-		else this.ctx.fillStyle = colour;
+		if (!colour)  {
+			texture = this.getNodeColour(node);
 
-		this.ctx.fillRect(
-			node.x * (this.settings.nodeSize + this.settings.nodeGap), 
-			node.y * (this.settings.nodeSize + this.settings.nodeGap), 
-			this.settings.nodeSize,
-			this.settings.nodeSize
-		);
+			if (typeof texture === 'object' && !Array.isArray(texture) && texture !== null) {
+				this.ctx.drawImage(
+					texture, 
+					node.x * (this.settings.nodeSize + this.settings.nodeGap), 
+					node.y * (this.settings.nodeSize + this.settings.nodeGap), 
+					this.settings.nodeSize, this.settings.nodeSize
+				);
+
+			} else {
+				this.ctx.fillStyle = texture;	
+				this.ctx.fillRect(
+					node.x * (this.settings.nodeSize + this.settings.nodeGap), 
+					node.y * (this.settings.nodeSize + this.settings.nodeGap), 
+					this.settings.nodeSize,
+					this.settings.nodeSize
+				);
+			}
+
+
+		} else {
+			this.ctx.fillStyle = colour;
+
+			this.ctx.fillRect(
+				node.x * (this.settings.nodeSize + this.settings.nodeGap), 
+				node.y * (this.settings.nodeSize + this.settings.nodeGap), 
+				this.settings.nodeSize,
+				this.settings.nodeSize
+			);
+		}
+
+		
+		
 	},
 
 	renderFinalPath: async function(exitNode) {
 		while (!exitNode.isEntry && !controller.stop) {
-			view.renderNode(exitNode, "#52ff9c");
+			view.renderNode(exitNode, "purple");
 			exitNode = exitNode.parent;
 			await this.sleep(20);
-		} view.renderNode(exitNode, "#52ff9c");
+		} view.renderNode(exitNode, "purple");
 	},
 
 	getNodeColour: function(node) {
 		if ((node.isEntry) || (node.isExit)) {
-			colour = "#ff8c00";
+			colour = "pink"; 		//orange
+			console.log("PINK")
 		} else if (node.isWall) {
-			colour = "#000000";
+			colour = brick_asset;
 		} else if (node.explored) {
-			colour = "#7990bf";
-		} else colour = "#c1cde6";
-
+			colour = "#7990bf"; 		//bluish purple / explored
+		} else colour = grass_asset;
 		return colour;
 	},
 
@@ -72,7 +105,6 @@ view = {
 	},
 
 	printDetails: function(data) {
-		console.log(data);
 		size 		= controller.getModel().gridSize;
 		total_nodes = data[3] * data[4];
 		explored 	= 0;
@@ -90,6 +122,8 @@ view = {
 	sleep: function(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
-}
 
-view.initControls();
+}
+	
+
+	
